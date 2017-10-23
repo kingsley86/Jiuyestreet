@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head>
+    <meta charset="UTF-8">
+    <title>就业街</title>
+    <meta property="qc:admins" content="104512713762134255463757">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1,IE=edge">
+
+    <link href="http://www.jiuyejie.cn/image/data/jiuyejie/ico.png" rel="icon">
+    <link rel="stylesheet" type="text/css" href="css/public.css">
+    <link rel="alternate" type="application/vnd.wap.xhtml+xml" media="handheld" href="http://www.jiuyejie.cn/target">
+    <script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.16.custom.css">
+    <script type="text/javascript" src="js/jquery.similar.msgbox.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="js/public.js"></script>
+    <script src="./就业街_files/wb.js" type="text/javascript" charset="utf-8"></script><script charset="UTF-8" src="jiuyestreet/query"></script>
+
+    <script type="text/javascript" src="js/jquery.fancybox.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/jquery.fancybox.css">
+    <script src="js/jweixin-1.0.0.js"></script>
+
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/app.css" rel="stylesheet">
+    <link href="css/idangerous.swiper2.7.6.css" rel="stylesheet">
+
+    <script src="js/idangerous.swiper-2.1.min.js"></script>
+    <script src="js/app.js"></script>
+
+    <script type="text/javascript">
+        var login_lx = '0';
+        $(document).ready(function(e) {
+            //回车触发登录事件
+            $('#login_out .login_in .geren input').keydown(function(e) {
+                if (e.keyCode == 13) {
+                    func_login();
+                }
+            });
+
+            //退出事件
+            $('.logout_but').on('click',function(){
+                $.MsgBox.Confirm('温馨提示','确定要退出登录吗？',function(){
+                    $.ajax({
+                        url:'index.php?route=account/login/logout',
+                        success:function(data) {
+                            if(parseFloat(data) == 1) {
+                                //window.location.reload();
+                                //alert('退出成功！');
+                                window.location.href = 'index.php?route=common/home'
+                            }
+                        }
+                    });
+                });
+            });
+
+            $('a.menu_a').css('cursor','pointer');
+
+            //菜单的点击，判断是否需要重新登录
+            $('a.menu_a,div.menu_a,span.menu_a').live('click',function(){
+                //首先判断不分企业个人的登录
+                if($(this).attr('loginlx') == 0) {
+                    $('#menu_login_lx').val('0');
+                    if(login_lx == '0') {	//未登录
+                        $('#login_url').val($(this).attr('url'));
+                        $('#logout').val('0');
+                        //$('#login_but').click();
+                        geren_login();
+                    } else {
+                        window.location.href = $(this).attr('url');
+                    }
+                } else if($(this).attr('loginlx') == 1)	{//个人登录
+                    $('#menu_login_lx').val('1');
+                    //如果没有登录或者是登录类型为企业，则重新登录
+                    if(login_lx == '0'){
+                        $('#login_url').val($(this).attr('url'));
+                        $('#logout').val('0');
+                        //$('#login_but').click();
+                        geren_login();
+                    } else if(login_lx == '2') {	//已经企业登录
+                        //提示确认后，重新登录
+                        $.MsgBox.Confirm('温馨提示','是否切换使用个人账户登录继续操作？',function(){
+                            $('#login_url').val($(this).attr('url'));
+                            $('#logout').val('1');
+                            //$('#login_but').click();
+                            geren_login();
+                        });
+                    } else {
+                        window.location.href = $(this).attr('url');
+                    }
+                } else if($(this).attr('loginlx') == 2) {//企业
+                    $('#menu_login_lx').val('2');
+                    //如果没有登录或者是登录类型为个人，则重新登录
+                    if(login_lx == '0'){
+                        $('#login_url').val($(this).attr('url'));
+                        $('#logout').val('0');
+                        //$('#login_but').click();
+                        qiye_login();
+                    } else if(login_lx == '1') {		//已经个人登录
+                        //提示确认后，重新登录
+                        $.MsgBox.Confirm('温馨提示','是否切换使用公司或企业账户登录继续操作？',function(){
+                            $('#login_url').val($(this).attr('url'));
+                            $('#logout').val('1');
+                            //$('#login_but').click();
+                            qiye_login();
+                        });
+                    } else {
+                        window.location.href = $(this).attr('url');
+                    }
+                }
+            });
+        });
+
+        function qiye_login() {
+            $('#menu_login_lx').val('0');
+            $('#login_url').val('');
+            $("#login_out").fadeIn(500).css('width',$(window).width()).css('height',$(window).height());
+            $(".login_in").css('left',($(window).width())/2).css('top',($(window).height())/2);
+            $('.qiye_left').click();
+        }
+
+        function geren_login() {
+            $('#menu_login_lx').val('0');
+            $('#login_url').val('');
+            $("#login_out").fadeIn(500).css('width',$(window).width()).css('height',$(window).height());
+            $(".login_in").css('left',($(window).width())/2).css('top',($(window).height())/2);
+            $('.geren_left').click();
+        }
+
+        //登录事件
+        function func_login() {
+            //alert('login');
+            $.ajax({
+                url: 'index.php?route=account/login/login',
+                type: 'post',
+                data: 'email=' + $('input[name="login_email"]').val() + '&password=' + encodeURIComponent($('input[name="login_password"]').val()) + '&lx=' + $('input[name="login_lx"]').val() + '&remember=' + ($('#remember:checked').val()==null?'0':'1') + '&logout=' + $('#logout').val(),
+                dataType:'json',
+                beforeSend:function() {
+                    if($('input[name="login_email"]').val() == '') {
+                        //alert("邮箱不能为空！");
+                        $.MsgBox.Alert("消息","邮箱不能为空！");
+                        return false;
+                    }
+                    if($('input[name="login_password"]').val() == '') {
+                        //alert("密码不能为空！");
+                        $.MsgBox.Alert("消息","密码不能为空！");
+                        return false;
+                    }
+                    //如果选择的类型与菜单要求的类型不一致
+                    if($('#menu_login_lx').val() != '0') {
+                        if($('#menu_login_lx').val() != $('#login_lx').val()) {
+                            $.MsgBox.Alert('警告','请选择' + ($('#menu_login_lx').val()==1?'个人帐户':'企业帐户'));
+                            return false;
+                        }
+                    }
+                },
+                success: function(json) {
+                    if(json['success']) {
+//					$.MsgBox.Alert2("消息","亲，您已经成功登陆！",function(){
+//						if(json['redirect']) {
+//							window.location.href=json['redirect'];
+//						} else {
+//							//如果url为空,刷新页面，否则跳转到该页面
+//							if($('#login_url').val() == '') {
+//								location.reload();
+//							} else {
+//								window.location.href=$('#login_url').val();
+//							}
+//						}
+//					});
+                        if(json['jiangjin'] == '0') {
+                            //如果资金为0，表示不用抽奖
+                            $.MsgBox.Alert2("消息","亲，您已经成功登陆！",function(){
+                                if(json['redirect']) {
+                                    window.location.href=json['redirect'];
+                                } else {
+                                    //如果url为空,刷新页面，否则跳转到该页面
+                                    if($('#login_url').val() == '') {
+                                        location.reload();
+                                    } else {
+                                        window.location.href=$('#login_url').val();
+                                    }
+                                }
+                            });
+                        } else {
+                            //弹出抽奖页面
+                            $('#hidden_jiangjin').val(json['jiangjin']);
+                            $('#login_redirect_url').val(json['redirect']);
+                            $('#jiangjin').html(json['jiangjin'] + '元');
+                            $("#jiangpin_out").fadeIn(500).css('width',$(window).width()).css('height',$(window).height());
+                            $(".jiangpin_in").css('left',($(window).width())/2).css('top',($(window).height())/2);
+                        }
+                    }
+                    if(json['error']) {
+                        $.MsgBox.Alert("消息",json['error']);
+                        //关闭登录窗口
+                        //$("#login_out").fadeOut(500);
+                    }
+
+                }
+            });
+        }
+        function func_cancel() {
+            $("#login_out").fadeOut(500);
+        }
+    </script>
+</head>
+<body>
+<div id="fantop"></div>
+
+<!-- htop  start -->
+<div class="tnavperipheral">
+    <div class="top-nav">
+        <div class="onavleft">
+            <i class="fa fa-home fa-fw"></i>
+            <span>您好,欢迎来到就业街！</span>
+        </div>
+        <ul class="onavright">
+            <!--<li class="onavlist "><p class="ontog"></p>高校登录</li>-->
+
+            <li class="onavlist" onclick="window.location.href=&#39;index.php?route=account/login_school&#39;;"><p class="ontog"></p>就业服务单位登录</li>
+            <li class="onavlist" onclick="qiye_login();"><p class="ontog"></p>企业登录</li>
+            <li class="onavlist" onclick="geren_login();"><p class="ontog"></p>个人登录</li>
+            <li class="onavlist"><p class="ontog"></p>相册</li>
+            <li class="onavlist">
+                <p class="ontog"></p>
+                <p class="onamel">消息</p>
+                <p class="sanjiao"></p>
+                <p class="shuliag">8</p>
+            </li>
+            <li class="onavlist firstli lastli">我的中心<i class="fa fa-angle-down fa-fw"></i>
+                <ul class="ondown">
+                    <li class="down">某某1</li>
+                    <li class="down">某某2</li>
+                    <li class="down">某某3</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+<div id="login_out">
+    <div class="login_wai"></div>
+    <div class="login_in">
+        <input type="hidden" name="login_lx" id="login_lx" value="1" desc="1:个人;2:企业">
+        <input type="hidden" name="menu_login_lx" id="menu_login_lx" value="0" desc="菜单的登录类型">
+        <input type="hidden" name="login_url" id="login_url" desc="点击菜单后跳转的页面">
+        <input type="hidden" name="logout" id="logout" value="0" desc="是否需要先退出再登录 0：不需要；1：需要">
+
+        <input type="hidden" name="login_redirect_url" id="login_redirect_url" value="" desc="登录成功的要跳转的页面">
+        <input type="hidden" name="hidden_jiangjin" id="hidden_jiangjin" value="" desc="抽奖生成的奖金">
+        <div class="qiehuan">
+            <div class="geren_left">个人账户</div>
+            <div class="qiye_left">企业账户</div>
+        </div>
+        <a class="zhanghu" href="http://www.jiuyejie.cn/index.php?route=account/register">创建账户</a>
+        <div class="geren">
+            <img class="pic" src="./就业街_files/img.png">
+            <div class="placeholder">
+                <!--<input class="email" type="text" style="ime-mode:disabled"/>-->
+                <input type="text" name="login_email" placeholder="Email" class="email">
+                <!--<span>Email</span>-->
+            </div>
+            <div class="placeholder">
+                <!--<input class="password" type="password"/>-->
+                <input type="password" name="login_password" placeholder="密码" class="password">
+                <!--<span>密码</span>-->
+            </div>
+            <div class="jizhu">
+                <div class="duihao" onclick="$(&#39;#remember&#39;).click();"></div>
+                <input type="checkbox" id="remember" name="remember" value="1" style="display:none;">
+                <span class="s1">记住登录状态</span>
+                <a href="http://www.jiuyejie.cn/index.php?route=account/forgotten"><span class="s2">忘记密码？</span></a>
+            </div>
+            <button class="denglu" onclick="func_login();">登录</button>
+            <div class="huo">
+                <span>或</span>
+            </div>
+            <div class="third_party geren_data">
+                <a href="https://api.weibo.com/oauth2/authorize?client_id=1633125544&amp;redirect_uri=http%3A%2F%2Fwww.jystreet.com%2Fweibo%2Fcallback.php&amp;response_type=code" target="_blank" id="header_weibo"><span class="one"></span></a>
+                <span class="two" onclick="toQzoneLogin()"></span>
+                <span class="three" onclick="weixin_login();"></span>
+            </div>
+        </div>
+        <!--<div class="qiye">
+            <img class="pic" src="catalog/view/theme/default/img/public/img.png"/>
+            <div class="placeholder">
+              <input class="email" type="text" style="ime-mode:disabled"/>
+              <span>Email</span>
+            </div>
+            <div class="placeholder">
+              <input class="password" type="password"/>
+              <span>密码</span>
+            </div>
+            <div class="jizhu">
+              <div class="duihao"></div>
+              <span class="s1">记住登录状态</span>
+              <a href=""><span class="s2">忘记密码？</span></a>
+            </div>
+            <button class="denglu">登录</button>
+        </div>-->
+    </div>
+</div>
+<div class="sidebar">
+    <div class="tow-nav">
+        <div class="logs">
+            <img class="to-log" src="images/logo.png" alt="">
+            <img class="to-font" src="images/logo-font.png" alt="">
+        </div>
+        <ul class="mainnav">
+            <a href="http://www.jiuyejie.cn/index.php?route=common/home">
+                <li class="subnav">首页</li>
+            </a>
+            <a href="http://www.jiuyejie.cn/index.php?route=qiye/zhiwei_list">
+                <li class="subnav">搜职位</li>
+            </a>
+            <a href="http://www.jiuyejie.cn/index.php?route=information/list">
+                <li class="subnav">查简章</li>
+            </a>
+            <a href="http://www.jiuyejie.cn/index.php?route=qiye/zhiwei_list">
+                <li class="subnav">找实习</li>
+            </a>
+            <a href="http://www.jiuyejie.cn/index.php?route=shuangxuanhui/list">
+                <li class="subnav">双选会</li>
+            </a>
+            <a href="http://www.jiuyejie.cn/index.php?route=shuangxuanhui/xjh_list">
+                <li class="subnav">宣讲会</li>
+            </a>
+            <a href="http://www.jiuyejie.cn/index.php?route=qiye/jianli">
+                <li class="subnav">邀人才</li>
+            </a>
+            <a href="http://www.jiuyejie.cn/index.php?route=qiye/daohang">
+                <li class="subnav sublast">高校导航</li>
+            </a>
+        </ul>
+    </div>
+</div> <!-- htop end -->
+<script src="./就业街_files/directionMask.js" type="text/javascript" charset="utf-8"></script>
+<div class="i-container ">
+    <!-- 侧边栏 -->
+    <div class="i-column" style="position:relative; z-index:100000000;">
+        <ul class="i-colle">
+            <li class="i-subcol">
+                <p class="i-subcl1"><i class="fa fa-user-plus fa-fw"></i></p>
+                <p class="i-subcl2">创建简历</p>
+                <p class="i-subcl3"><i class="fa fa-angle-right fa-fw"></i></p>
+            </li>
+            <li class="i-subcol">
+                <p class="i-subcl1"><i class="fa fa-search fa-fw"></i></p>
+                <p class="i-subcl2">职位搜索</p>
+                <p class="i-subcl3"><i class="fa fa-angle-right fa-fw"></i></p>
+            </li>
+            <li class="i-subcol">
+                <p class="i-subcl1"><i class="fa fa-laptop fa-fw"></i></p>
+                <p class="i-subcl2">网上签约</p>
+                <p class="i-subcl3"><i class="fa fa-angle-right fa-fw"></i></p>
+            </li>
+            <li class="i-subcol">
+                <p class="i-subcl1"><i class="fa fa-copy fa-fw"></i></p>
+                <p class="i-subcl2">招聘简章发布</p>
+                <p class="i-subcl3"><i class="fa fa-angle-right fa-fw"></i></p>
+            </li>
+            <li class="i-subcol">
+                <p class="i-subcl1"><i class="fa fa-suitcase fa-fw"></i></p>
+                <p class="i-subcl2">职位发布</p>
+                <p class="i-subcl3"><i class="fa fa-angle-right fa-fw"></i></p>
+            </li>
+            <li class="i-subcol">
+                <p class="i-subcl1"><i class="fa fa-fax fa-fw"></i></p>
+                <p class="i-subcl2">企业双选会报名</p>
+                <p class="i-subcl3"><i class="fa fa-angle-right fa-fw"></i></p>
+            </li>
+            <li class="i-subcol">
+                <p class="i-subcl1"><i class="fa fa-paste fa-fw"></i></p>
+                <p class="i-subcl2">高校双选会创建</p>
+                <p class="i-subcl3"><i class="fa fa-angle-right fa-fw"></i></p>
+            </li>
+            <li class="i-subcol">
+                <p class="i-subcl1"><i class="fa fa-chain fa-fw"></i></p>
+                <p class="i-subcl2">企业宣讲会申请</p>
+                <p class="i-subcl3"><i class="fa fa-angle-right fa-fw"></i></p>
+            </li>
+        </ul>
+        <!-- lb right -->
+        <div class="i-collrig">
+            <div class="i-collrt-titl">就业街-专注高校就业与企业校招</div>
+            <ul class="i-coll-conten">
+                <li class="i-coll-li i-cle">
+                    <div class="i-coll-li2">
+                        <p><img src="images/eb1.png" alt=""></p>
+                        <p>就业工作<br>统一管理平台</p>
+                    </div>
+                    <p class="i-colitop"><img src="images/ex1.png" alt=""></p>
+                    <p>高校</p>
+                </li>
+                <li class="i-coll-li i-cler">
+                    <div class=" i-coll-li2">
+                        <p><img src="images/eb2.png" alt=""></p>
+                        <p>高效率<br>校招神器</p>
+                    </div>
+                    <p class="i-colitop"><img src="images/ex2.png" alt=""></p>
+                    <p>企业</p>
+                </li>
+                <li class="i-coll-li i-cle">
+                    <div class="i-coll-li2">
+                        <p><img src="images/eb3.png" alt=""></p>
+                        <p>简单、有效的<br>第一次求职</p>
+                    </div>
+                    <p class="i-colitop"><img src="images/ex2.png" alt=""></p>
+                    <p>毕业生</p>
+                </li>
+                <li class="i-coll-li i-cler">
+                    <div class="i-coll-li2">
+                        <p><img src="images/eb4.png" alt=""></p>
+                        <p>实时掌控<br>就业大数据</p>
+                    </div>
+                    <p class="i-colitop"><img src="images/ex2.png" alt=""></p>
+                    <p>人社</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- 轮播 -->
+    <div class="swiper-container swiper-container-horizontal" style="height:380px;overflow: hidden;">
+        <div class="swiper-wrapper" style="transform: translate3d(-3798px, 0px, 0px); transition-duration: 0.3s; width: 9495px; height: 380px;"><div xmlns="http://www.w3.org/1999/xhtml" class="swiper-slide" data-swiper-slide-index="2" style="width: 1899px; height: 380px;">
+            <img class="i-lbt" src="images/bd3.jpg" alt="">
+        </div>
+            <div class="swiper-slide" data-swiper-slide-index="0" style="width: 1899px; height: 380px;">
+                <img class="i-lbt" src="images/bd1.jpg" alt="">
+            </div>
+            <div class="swiper-slide swiper-slide-visible swiper-slide-active" data-swiper-slide-index="1" style="width: 1899px; height: 380px;">
+                <img class="i-lbt" src="images/bd2.jpg" alt="">
+            </div>
+            <div class="swiper-slide" data-swiper-slide-index="2" style="width: 1899px; height: 380px;">
+                <img class="i-lbt" src="images/bd3.jpg" alt="">
+            </div>
+            <div xmlns="http://www.w3.org/1999/xhtml" class="swiper-slide" data-swiper-slide-index="0" style="width: 1899px; height: 380px;">
+                <img class="i-lbt" src="images/bd1.jpg" alt="">
+            </div></div>
+        <!-- Add Pagination -->
+        <div class="swiper-pagination swiper-pagination-clickable swiper-pagination-bullets"><span class="swiper-pagination-switch"></span><span class="swiper-pagination-switch swiper-visible-switch swiper-active-switch"></span><span class="swiper-pagination-switch"></span></div>
+        <!-- Add Arrows -->
+        <!-- <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div> -->
+    </div>
+    <!-- 轮播js -->
+    <script>
+        var swiper = new Swiper('.swiper-container', {
+            pagination: '.swiper-pagination',
+            // nextButton: '.swiper-button-next',
+            // prevButton: '.swiper-button-prev',
+            slidesPerView: 1,
+            paginationClickable: true,
+            spaceBetween: 30,
+            loop: true,
+            autoplay: 3000
+        });
+    </script>
+
+    <!-- 双选会 -->
+    <div class="i-joinus">
+        <div class="i-jotitle">
+            <div class="i-campus">
+                <p><img src="images/new01.png" alt=""></p>
+                <ul class="i-zixun">
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##">[济南]</a>
+                        <p class="i-wenb"><a href="http://site.jiuyejie.cn/index.php?route=shuangxuanhui/shuangxuanhui&amp;sxh_id=71&amp;domain=jyj" target="_blank">就业街（山东管理学院站）“微信抢offer”招聘会</a></p>
+                        <a class="i-time" href="http://www.jiuyejie.cn/##">10月25日</a>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##">[济南]</a>
+                        <p class="i-wenb"><a href="http://site.jiuyejie.cn/index.php?route=shuangxuanhui/shuangxuanhui&amp;sxh_id=70&amp;domain=sdili" target="_blank">齐鲁工业大学（山东省科学院）2018届毕业生秋季招聘周</a></p>
+                        <a class="i-time" href="http://www.jiuyejie.cn/##">11月06日</a>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##">[青岛]</a>
+                        <p class="i-wenb"><a href="http://site.jiuyejie.cn/index.php?route=shuangxuanhui/shuangxuanhui&amp;sxh_id=66&amp;domain=jyj" target="_blank">就业街（青岛大学站）“微信抢offer”招聘会</a></p>
+                        <a class="i-time" href="http://www.jiuyejie.cn/##">10月26日</a>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##">[青岛]</a>
+                        <p class="i-wenb"><a href="http://site.jiuyejie.cn/index.php?route=shuangxuanhui/shuangxuanhui&amp;sxh_id=65&amp;domain=qdu" target="_blank">青岛大学2018届11月26日毕业生秋冬季大型供需见面双选会</a></p>
+                        <a class="i-time" href="http://www.jiuyejie.cn/##">11月26日</a>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##">[济南]</a>
+                        <p class="i-wenb"><a href="http://site.jiuyejie.cn/index.php?route=shuangxuanhui/shuangxuanhui&amp;sxh_id=61&amp;domain=sdmu" target="_blank">山东管理学院2017年秋季校园招聘会</a></p>
+                        <a class="i-time" href="http://www.jiuyejie.cn/##">11月01日</a>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##">[青岛]</a>
+                        <p class="i-wenb"><a href="http://site.jiuyejie.cn/index.php?route=shuangxuanhui/shuangxuanhui&amp;sxh_id=60&amp;domain=qdxy" target="_blank">青岛理工大学琴岛学院2018届第二场校园招聘会</a></p>
+                        <a class="i-time" href="http://www.jiuyejie.cn/##">12月09日</a>
+                    </li>
+                    <!--	  					<li class="i-zxian">
+          <a class="i-local" href="##">[青岛]</a>
+          <p class="i-wenb">中国石油大学2017级见面会</p>
+          <a class="i-time" href="##">2月28日</a>
+      </li>
+      <li class="i-zxian">
+          <a class="i-local" href="##">[济南]</a>
+          <p class="i-wenb">山东大学高端制造业专场供需见面会</p>
+          <a class="i-time" href="##">2月30日</a>
+      </li>
+      <li class="i-zxian">
+          <a class="i-local" href="##">[泰安]</a>
+          <p class="i-wenb">山东科技大学2018级机械制造专场供需见面会</p>
+          <a class="i-time" href="##">3月07日</a>
+      </li>
+      <li class="i-zxian">
+          <a class="i-local" href="##">[青岛]</a>
+          <p class="i-wenb">中国石油大学2017级见面会</p>
+          <a class="i-time" href="##">2月28日</a>
+      </li>
+      <li class="i-zxian">
+          <a class="i-local" href="##">[青岛]</a>
+          <p class="i-wenb">山东大学高端制造业专场供需见面会</p>
+          <a class="i-time" href="##">4月12日</a>
+      </li>
+      <li class="i-zxian">
+          <a class="i-local" href="##">[青岛]</a>
+          <p class="i-wenb">中国石油大学2017级工序见面会</p>
+          <a class="i-time" href="##">2月28日</a>
+      </li>-->
+                </ul>
+            </div>
+            <!-- 宣讲会 -->
+            <div class="i-company">
+                <p><img src="images/new02.png" alt=""></p>
+                <ul class="i-zixun">
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="滨州戴森车轮科技有限公司">[滨州戴森车...]</a>
+                        <p class="i-wenb" title="滨州戴森车轮科技有限公司招聘宣讲会"><a href="http://qdu.jiuyejie.cn/index.php?route=shuangxuanhui/xuanjianghui&amp;xjh_id=48" target="_blank">滨州戴森车轮科技有限公司招聘宣讲会</a></p>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="临沂金利液压科技有限公司">[临沂金利液...]</a>
+                        <p class="i-wenb" title="临沂金利液压科技有限公司宣讲会"><a href="http://upc.jiuyejie.cn/index.php?route=shuangxuanhui/xuanjianghui&amp;xjh_id=184" target="_blank">临沂金利液压科技有限公司宣讲会</a></p>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="富士康（南京）软件有限公司">[富士康（南...]</a>
+                        <p class="i-wenb" title="富士康科技集团2018届菁干班招募"><a href="http://qdu.jiuyejie.cn/index.php?route=shuangxuanhui/xuanjianghui&amp;xjh_id=98" target="_blank">富士康科技集团2018届菁干班招募</a></p>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="山东长风云帆创业服务有限公司">[山东长风云...]</a>
+                        <p class="i-wenb" title="应届生顶岗实习"><a href="http://sdmu.jiuyejie.cn/index.php?route=shuangxuanhui/xuanjianghui&amp;xjh_id=447" target="_blank">应届生顶岗实习</a></p>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="山东链家房地产经纪有限公司">[山东链家房...]</a>
+                        <p class="i-wenb" title="链家集团2018校园招聘"><a href="http://sdili.jiuyejie.cn/index.php?route=shuangxuanhui/xuanjianghui&amp;xjh_id=206" target="_blank">链家集团2018校园招聘</a></p>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="索尼精密部件（惠州）有限公司">[索尼精密部...]</a>
+                        <p class="i-wenb" title="索尼精密部件（惠州）有限公司2018校园招聘"><a href="http://qust.jiuyejie.cn/index.php?route=shuangxuanhui/xuanjianghui&amp;xjh_id=53" target="_blank">索尼精密部件（惠州）有限公司2018校园招聘</a></p>
+                    </li>
+                    <!--	  					<li class="i-zxian">
+                          <a class="i-local" href="##">[百度公司]</a>
+                          <p class="i-wenb">山东科技大学2018级机级机械制造专场招聘大会</p>
+                      </li>
+                      <li class="i-zxian">
+                          <a class="i-local" href="##">[中国联通]</a>
+                          <p class="i-wenb">山东理工大学冬季雇主见面大会</p>
+                      </li>
+                      <li class="i-zxian">
+                          <a class="i-local" href="##">[济南快付网络科技有限公司]</a>
+                          <p class="i-wenb  i-we">山东大学崂山校区金色什么什么什么</p>
+                      </li>
+                      <li class="i-zxian">
+                          <a class="i-local" href="##">[青岛就业大街大数据有限公司]</a>
+                          <p class="i-wenb  i-we">青岛大学博文楼宇203山校区</p>
+                      </li>
+                      <li class="i-zxian">
+                          <a class="i-local" href="##">[青岛云动天下传媒公司]</a>
+                          <p class="i-wenb  i-we">山东科技大学2018级机械制造专业</p>
+                      </li>
+                      <li class="i-zxian">
+                          <a class="i-local" href="##">[百度公司]</a>
+                          <p class="i-wenb">山东科技大学2018级机械制造专场招山校区</p>
+                      </li>-->
+                </ul>
+            </div>
+            <!-- 招聘简章 -->
+            <div class="i-newest">
+                <p><img src="images/new03.png" alt=""></p>
+                <ul class="i-zixun">
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="浙江恒逸集团有限公司">[浙江恒逸集...]</a>
+                        <p class="i-wenb i-webs" onclick="window.open(&#39;index.php?route=information/zpjz&amp;information_id=879&#39;);">恒逸集团2018校园招聘简章</p>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="河北航空有限公司">[河北航空有...]</a>
+                        <p class="i-wenb i-webs" onclick="window.open(&#39;index.php?route=information/zpjz&amp;information_id=856&#39;);">中信银行济南分行2018年校园招聘</p>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="青岛汇赢科技有限公司">[青岛汇赢科...]</a>
+                        <p class="i-wenb i-webs" onclick="window.open(&#39;index.php?route=information/zpjz&amp;information_id=854&#39;);">诚聘设备销售工程师5名</p>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="震旦（中国）有限公司">[震旦（中国...]</a>
+                        <p class="i-wenb i-webs" onclick="window.open(&#39;index.php?route=information/zpjz&amp;information_id=853&#39;);">震旦集团2018校园招聘</p>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="济南易恒技术有限公司">[济南易恒技...]</a>
+                        <p class="i-wenb i-webs" onclick="window.open(&#39;index.php?route=information/zpjz&amp;information_id=851&#39;);">济南易恒技术有限公司2018校园招聘</p>
+                    </li>
+                    <li class="i-zxian">
+                        <a class="i-local" href="http://www.jiuyejie.cn/##" title="青岛汇赢科技有限公司">[青岛汇赢科...]</a>
+                        <p class="i-wenb i-webs" onclick="window.open(&#39;index.php?route=information/zpjz&amp;information_id=849&#39;);">诚聘嵌入式软件工程师2名</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- index conten 2 -->
+    <div class="i-shop">
+        <!-- 最新工作 -->
+        <div class="i-shopcoen">
+            <div class="i-shop-le0">		  	</div>
+            <ul class="i-shop-ri">
+
+                <li class="i-single i-butedge">
+                    <div class="i-singleft">
+                        <p class="i-sl1">
+                            <span class="i-sl1name" onclick="window.open(&#39;index.php?route=qiye/zhiwei/info&amp;zhiwei_id=26280&#39;);">Oracle EBS财务实施顾问</span>
+                            <span class="i-sl1address">山东-济南</span>
+                        </p>
+                        <p>
+                            <span class="i-sl1qisd">期待薪资 :</span>
+                            <span class="i-sl1money">0 - 3K</span>
+                        </p>
+                        <p class="i-sl2">
+                            <span class="i-slspz">学历要求 ：本科</span>
+                            <!--<span class="i-slspr">工作年限 ：3-5年</span>-->
+                        </p>
+                        <p class="i-sl3">
+                            7天前发布
+                        </p>
+                    </div>
+                    <img class="i-shopimg" src="images/12798858_S-163x81auto.jpg" alt="">
+                </li>
+                <li class="i-single i-butedge">
+                    <div class="i-singleft">
+                        <p class="i-sl1">
+                            <span class="i-sl1name" onclick="window.open(&#39;index.php?route=qiye/zhiwei/info&amp;zhiwei_id=26272&#39;);">谷泽天下农场高薪聘店销售</span>
+                            <span class="i-sl1address">山东-青岛</span>
+                        </p>
+                        <p>
+                            <span class="i-sl1qisd">期待薪资 :</span>
+                            <span class="i-sl1money">5 - 10K</span>
+                        </p>
+                        <p class="i-sl2">
+                            <span class="i-slspz">学历要求 ：大专</span>
+                            <!--<span class="i-slspr">工作年限 ：3-5年</span>-->
+                        </p>
+                        <p class="i-sl3">
+                            7天前发布
+                        </p>
+                    </div>
+                    <img class="i-shopimg" src="images/1508137146268-163x81auto.jpg" alt="">
+                </li>
+                <li class="i-single i-butedge">
+                    <div class="i-singleft">
+                        <p class="i-sl1">
+                            <span class="i-sl1name" onclick="window.open(&#39;index.php?route=qiye/zhiwei/info&amp;zhiwei_id=26270&#39;);">品牌产品推广专员</span>
+                            <span class="i-sl1address">山东-青岛</span>
+                        </p>
+                        <p>
+                            <span class="i-sl1qisd">期待薪资 :</span>
+                            <span class="i-sl1money">5 - 10K</span>
+                        </p>
+                        <p class="i-sl2">
+                            <span class="i-slspz">学历要求 ：大专</span>
+                            <!--<span class="i-slspr">工作年限 ：3-5年</span>-->
+                        </p>
+                        <p class="i-sl3">
+                            7天前发布
+                        </p>
+                    </div>
+                    <img class="i-shopimg" src="images/1508137146268-163x81auto.jpg" alt="">
+                </li>
+                <li class="i-single i-butedge">
+                    <div class="i-singleft">
+                        <p class="i-sl1">
+                            <span class="i-sl1name" onclick="window.open(&#39;index.php?route=qiye/zhiwei/info&amp;zhiwei_id=26267&#39;);">绿色生态农场聘储备店长</span>
+                            <span class="i-sl1address">山东-青岛</span>
+                        </p>
+                        <p>
+                            <span class="i-sl1qisd">期待薪资 :</span>
+                            <span class="i-sl1money">5 - 10K</span>
+                        </p>
+                        <p class="i-sl2">
+                            <span class="i-slspz">学历要求 ：大专</span>
+                            <!--<span class="i-slspr">工作年限 ：3-5年</span>-->
+                        </p>
+                        <p class="i-sl3">
+                            7天前发布
+                        </p>
+                    </div>
+                    <img class="i-shopimg" src="images/1508137146268-163x81auto.jpg" alt="">
+                </li>
+
+
+                <!--                    <li class="i-single i-butedges">
+                                        <div class="i-singleft">
+                                            <p class="i-sl1">
+                                                <span class="i-sl1name">高级前端开发工程师</span>
+                                                <span class="i-sl1address">山东-青岛</span>
+                                            </p>
+                                            <p>
+                                                <span class="i-sl1qisd">期待薪资 :</span>
+                                                <span class="i-sl1money">12-16万</span>
+                                            </p>
+                                            <p class="i-sl2">
+                                                <span class="i-slspz">学历要求 ：不限</span>
+                                                <span class="i-slspr">工作年限 ：3-5年</span>
+                                            </p>
+                                            <p class="i-sl3">
+                                                3小时前发布
+                                            </p>
+                                        </div>
+                                        <img class="i-shopimg" src="catalog/view/theme/default/images/sosp.png" alt="">
+                                    </li>
+
+                                    <li class="i-single i-lefedges">
+                                        <div class="i-singleft">
+                                            <p class="i-sl1">
+                                                <span class="i-sl1name">高级前端开发工程师</span>
+                                                <span class="i-sl1address">山东-青岛</span>
+                                            </p>
+                                            <p>
+                                                <span class="i-sl1qisd">期待薪资 :</span>
+                                                <span class="i-sl1money">12-16万</span>
+                                            </p>
+                                            <p class="i-sl2">
+                                                <span class="i-slspz">学历要求 ：不限</span>
+                                                <span class="i-slspr">工作年限 ：3-5年</span>
+                                            </p>
+                                            <p class="i-sl3">
+                                                3小时前发布
+                                            </p>
+                                        </div>
+                                        <img class="i-shopimg" src="catalog/view/theme/default/images/sosp.png" alt="">
+                                    </li>
+
+                                    <li class="i-single">
+                                        <div class="i-singleft">
+                                            <p class="i-sl1">
+                                                <span class="i-sl1name">高级前端开发工程师</span>
+                                                <span class="i-sl1address">山东-青岛</span>
+                                            </p>
+                                            <p>
+                                                <span class="i-sl1qisd">期待薪资 :</span>
+                                                <span class="i-sl1money">12-16万</span>
+                                            </p>
+                                            <p class="i-sl2">
+                                                <span class="i-slspz">学历要求 ：不限</span>
+                                                <span class="i-slspr">工作年限 ：3-5年</span>
+                                            </p>
+                                            <p class="i-sl3">
+                                                3小时前发布
+                                            </p>
+                                        </div>
+                                        <img class="i-shopimg" src="catalog/view/theme/default/images/sosp.png" alt="">
+                                    </li>-->
+            </ul>
+        </div>
+        <!-- 最热工作 -->
+        <div class="i-shopcoen i-zuire">
+            <div class="i-shop-le1">		  	</div>
+            <ul class="i-shop-ri">
+                <li class="i-single i-butedge">
+                    <div class="i-singleft">
+                        <p class="i-sl1">
+                            <span class="i-sl1name" onclick="window.open(&#39;index.php?route=qiye/zhiwei/info&amp;zhiwei_id=14291&#39;);">客服专员</span>
+                            <span class="i-sl1address">山东-青岛</span>
+                        </p>
+                        <p>
+                            <span class="i-sl1qisd">期待薪资 :</span>
+                            <span class="i-sl1money">8K</span>
+                        </p>
+                        <p class="i-sl2">
+                            <span class="i-slspz">学历要求 ：中专</span>
+                            <!--<span class="i-slspr">工作年限 ：3-5年</span>-->
+                        </p>
+                        <p class="i-sl3">
+                            215天前发布
+                        </p>
+                    </div>
+                    <img class="i-shopimg" src="images/1498553358997-163x81auto.png" alt="">
+                </li>
+                <li class="i-single i-butedge">
+                    <div class="i-singleft">
+                        <p class="i-sl1">
+                            <span class="i-sl1name" onclick="window.open(&#39;index.php?route=qiye/zhiwei/info&amp;zhiwei_id=14994&#39;);">人事助理</span>
+                            <span class="i-sl1address">山东-青岛</span>
+                        </p>
+                        <p>
+                            <span class="i-sl1qisd">期待薪资 :</span>
+                            <span class="i-sl1money">3 - 5K</span>
+                        </p>
+                        <p class="i-sl2">
+                            <span class="i-slspz">学历要求 ：本科</span>
+                            <!--<span class="i-slspr">工作年限 ：3-5年</span>-->
+                        </p>
+                        <p class="i-sl3">
+                            207天前发布
+                        </p>
+                    </div>
+                    <img class="i-shopimg" src="images/1490863041767-163x81auto.png" alt="">
+                </li>
+                <li class="i-single i-butedge">
+                    <div class="i-singleft">
+                        <p class="i-sl1">
+                            <span class="i-sl1name" onclick="window.open(&#39;index.php?route=qiye/zhiwei/info&amp;zhiwei_id=18930&#39;);">销售</span>
+                            <span class="i-sl1address">北京市-辖区</span>
+                        </p>
+                        <p>
+                            <span class="i-sl1qisd">期待薪资 :</span>
+                            <span class="i-sl1money">20 - 30K</span>
+                        </p>
+                        <p class="i-sl2">
+                            <span class="i-slspz">学历要求 ：硕士</span>
+                            <!--<span class="i-slspr">工作年限 ：3-5年</span>-->
+                        </p>
+                        <p class="i-sl3">
+                            96天前发布
+                        </p>
+                    </div>
+                    <img class="i-shopimg" src="images/20150513135432_38_1-163x81auto.png" alt="">
+                </li>
+                <li class="i-single i-butedge">
+                    <div class="i-singleft">
+                        <p class="i-sl1">
+                            <span class="i-sl1name" onclick="window.open(&#39;index.php?route=qiye/zhiwei/info&amp;zhiwei_id=14702&#39;);">行政人事专员</span>
+                            <span class="i-sl1address">山东-青岛</span>
+                        </p>
+                        <p>
+                            <span class="i-sl1qisd">期待薪资 :</span>
+                            <span class="i-sl1money">3 - 5K</span>
+                        </p>
+                        <p class="i-sl2">
+                            <span class="i-slspz">学历要求 ：本科</span>
+                            <!--<span class="i-slspr">工作年限 ：3-5年</span>-->
+                        </p>
+                        <p class="i-sl3">
+                            213天前发布
+                        </p>
+                    </div>
+                    <img class="i-shopimg" src="images/1490339198518-163x81auto.jpg" alt="">
+                </li>
+                <!--<li class="i-single i-butedge">
+<div class="i-singleft">
+    <p class="i-sl1">
+        <span class="i-sl1name">高级前端开发工程师</span>
+        <span class="i-sl1address">山东-青岛</span>
+    </p>
+    <p>
+        <span class="i-sl1qisd">期待薪资 :</span>
+        <span class="i-sl1money">12-16万</span>
+    </p>
+    <p class="i-sl2">
+        <span class="i-slspz">学历要求 ：不限</span>
+        <span class="i-slspr">工作年限 ：3-5年</span>
+    </p>
+    <p class="i-sl3">
+      3小时前发布
+    </p>
+</div>
+<img class="i-shopimg" src="catalog/view/theme/default/images/sosp.png" alt="">
+</li>
+
+<li class="i-single i-butedges">
+<div class="i-singleft">
+    <p class="i-sl1">
+        <span class="i-sl1name">高级前端开发工程师</span>
+        <span class="i-sl1address">山东-青岛</span>
+    </p>
+    <p>
+        <span class="i-sl1qisd">期待薪资 :</span>
+        <span class="i-sl1money">12-16万</span>
+    </p>
+    <p class="i-sl2">
+        <span class="i-slspz">学历要求 ：不限</span>
+        <span class="i-slspr">工作年限 ：3-5年</span>
+    </p>
+    <p class="i-sl3">
+      3小时前发布
+    </p>
+</div>
+<img class="i-shopimg" src="catalog/view/theme/default/images/sosp.png" alt="">
+</li>
+
+<li class="i-single i-lefedges">
+<div class="i-singleft">
+    <p class="i-sl1">
+        <span class="i-sl1name">高级前端开发工程师</span>
+        <span class="i-sl1address">山东-青岛</span>
+    </p>
+    <p>
+        <span class="i-sl1qisd">期待薪资 :</span>
+        <span class="i-sl1money">12-16万</span>
+    </p>
+    <p class="i-sl2">
+        <span class="i-slspz">学历要求 ：不限</span>
+        <span class="i-slspr">工作年限 ：3-5年</span>
+    </p>
+    <p class="i-sl3">
+      3小时前发布
+    </p>
+</div>
+<img class="i-shopimg" src="catalog/view/theme/default/images/sosp.png" alt="">
+</li>
+
+<li class="i-single">
+<div class="i-singleft">
+    <p class="i-sl1">
+        <span class="i-sl1name">高级前端开发工程师</span>
+        <span class="i-sl1address">山东-青岛</span>
+    </p>
+    <p>
+        <span class="i-sl1qisd">期待薪资 :</span>
+        <span class="i-sl1money">12-16万</span>
+    </p>
+    <p class="i-sl2">
+        <span class="i-slspz">学历要求 ：不限</span>
+        <span class="i-slspr">工作年限 ：3-5年</span>
+    </p>
+    <p class="i-sl3">
+      3小时前发布
+    </p>
+</div>
+<img class="i-shopimg" src="catalog/view/theme/default/images/sosp.png" alt="">
+</li>-->
+            </ul>
+        </div>
+        <!--  -->
+    </div>
+
+    <!--金牌企业  -->
+    <div class="i-enterprise">
+        <div class="i-entitle">
+            <p class="i-jinqi">就业金牌企业</p>
+            <p class="i-qush">
+                顺应智慧就业街全球化发展趋势，“就业街”专注于帮助中国全新就业模式，拥抱互联网
+            </p>
+            <ul class="i-pinpai">
+                <li class="i-qilog i-qlone">
+                    <img src="images/12798858_S-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=4965&#39;);">德才装饰股份有限公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/22786657_S-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=1086&#39;);">上海考门医药科技有限公司青岛分公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/12798858_S-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=961&#39;);">青岛勇坤百货有限公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/12798858_S-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=1675&#39;);">山东大空间电气有限公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/12798858_S-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=1252&#39;);">凌云工业股份有限公司</div>
+                </li>
+                <li class="i-qilog i-qlone">
+                    <img src="images/1492142067722-221x74auto.png" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=7209&#39;);">宝世达国际控股集团有限公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/qiye001-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=2952&#39;);">青岛七金工贸有限公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/no_image-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=11648&#39;);">青岛黄浦职业专修学院</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/1507685384079-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=9030&#39;);">山东尚金投资股份有限公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/qiye001-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=1039&#39;);">三河市顺心置地房产经纪有限公司</div>
+                </li>
+                <li class="i-qilog i-qlone">
+                    <img src="images/12798858_S-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=2209&#39;);">曲阜晨光化工有限公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/qiye001-221x74auto.jpg" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=1117&#39;);">东营洁源化学清洗有限公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/1499932936236-221x74auto.png" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=8569&#39;);">山东皓特润滑油有限公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/1489548890445-221x74auto.png" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=5771&#39;);">青岛卡尔格博文化传播有限公司</div>
+                </li>
+                <li class="i-qilog">
+                    <img src="images/1507342772469-221x74auto.png" alt="">
+                    <div class="i-pinpai-tips" onclick="window.open(&#39;index.php?route=qiye/account&amp;customer_id=10125&#39;);">山东真房房地产经纪有限公司</div>
+                </li>
+                <!--	 			<li class="i-qilog i-qlone">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (1).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (2).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (3).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (4).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (5).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog i-qlone">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (6).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (7).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (8).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (9).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (10).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog i-qlone">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (11).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (12).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (13).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (14).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>
+              <li class="i-qilog">
+                         <img src="catalog/view/theme/default/images/shzs/logoss (15).png" alt="">
+                         <div class="i-pinpai-tips">测试呀</div>
+                     </li>-->
+            </ul>
+            <div class="i-chaniu">
+                <p class="i-jt"> &gt;</p>
+                <p class="i-ck">查看更多</p>
+            </div>
+        </div>
+    </div>
+    <!-- 福建 -->
+    <div class="i-fujian">
+        <div class="i-ftu">
+            <img src="images/hj.png" alt="">
+        </div>
+        <ul class="i-xmrs">
+            <li class="i-xmli">
+                <p class="i-xmleft">
+                    <a href="http://www.jiuyejie.cn/preview.html?customer_id=128" target="_blank">
+                        <img src="images/01-75x75auto.jpg" alt="">
+                    </a>
+                </p>
+                <div class="i-xmqing">
+                    <p class="i-xmname"><a href="http://www.jiuyejie.cn/preview.html?customer_id=128" target="_blank">HILLY</a></p>
+                    <p title="外贸业务员">外贸业务员</p>
+                    <p title="青岛理工大学">青岛理工大学</p>
+                    <p title="韩国语专业">韩国语专业</p>
+                </div>
+            </li>
+            <li class="i-xmli">
+                <p class="i-xmleft">
+                    <a href="http://www.jiuyejie.cn/preview.html?customer_id=309" target="_blank">
+                        <img src="images/x01-75x75auto.jpg" alt="">
+                    </a>
+                </p>
+                <div class="i-xmqing">
+                    <p class="i-xmname"><a href="http://www.jiuyejie.cn/preview.html?customer_id=309" target="_blank">TT</a></p>
+                    <p title="生物制药工程">生物制药工程</p>
+                    <p title="中山大学">中山大学</p>
+                    <p title="生物学">生物学</p>
+                </div>
+            </li>
+            <li class="i-xmli">
+                <p class="i-xmleft">
+                    <a href="http://www.jiuyejie.cn/preview.html?customer_id=187" target="_blank">
+                        <img src="images/x04-75x75auto.jpg" alt="">
+                    </a>
+                </p>
+                <div class="i-xmqing">
+                    <p class="i-xmname"><a href="http://www.jiuyejie.cn/preview.html?customer_id=187" target="_blank">美美的阳光</a></p>
+                    <p title="行政文员">行政文员</p>
+                    <p title="滨海学院">滨海学院</p>
+                    <p title="国际贸易">国际贸易</p>
+                </div>
+            </li>
+            <li class="i-xmli">
+                <p class="i-xmleft">
+                    <a href="http://www.jiuyejie.cn/preview.html?customer_id=111" target="_blank">
+                        <img src="images/x04-75x75auto.jpg" alt="">
+                    </a>
+                </p>
+                <div class="i-xmqing">
+                    <p class="i-xmname"><a href="http://www.jiuyejie.cn/preview.html?customer_id=111" target="_blank">丫丫 </a></p>
+                    <p title="编辑 ，记者">编辑 ，记者</p>
+                    <p title="青岛理工大学">青岛理工大学</p>
+                    <p title="日语">日语</p>
+                </div>
+            </li>
+            <li class="i-xmli">
+                <p class="i-xmleft">
+                    <a href="http://www.jiuyejie.cn/preview.html?customer_id=322" target="_blank">
+                        <img src="images/x03-75x75auto.jpg" alt="">
+                    </a>
+                </p>
+                <div class="i-xmqing">
+                    <p class="i-xmname"><a href="http://www.jiuyejie.cn/preview.html?customer_id=322" target="_blank">程翔</a></p>
+                    <p title="企业ceo">企业ceo</p>
+                    <p title="香港大学">香港大学</p>
+                    <p title="工商管理">工商管理</p>
+                </div>
+            </li>
+            <li class="i-xmli">
+                <p class="i-xmleft">
+                    <a href="http://www.jiuyejie.cn/preview.html?customer_id=175" target="_blank">
+                        <img src="images/01-75x75auto.jpg" alt="">
+                    </a>
+                </p>
+                <div class="i-xmqing">
+                    <p class="i-xmname"><a href="http://www.jiuyejie.cn/preview.html?customer_id=175" target="_blank">妃子</a></p>
+                    <p title="会计">会计</p>
+                    <p title="青岛滨海学院">青岛滨海学院</p>
+                    <p title="财务管理">财务管理</p>
+                </div>
+            </li>
+            <!--	 		<li class="i-xmli">
+                     <p class="i-xmleft">
+                         <img src="catalog/view/theme/default/images/renlogs (1).png" alt="">
+                     </p>
+                     <div class="i-xmqing">
+                         <p class="i-xmname">李强</p>
+                         <p>前端工程师</p>
+                         <p>中国石油大学</p>
+                         <p>网络传播专业</p>
+                     </div>
+                 </li>
+                 <li class="i-xmli">
+                     <p class="i-xmleft">
+                         <img src="catalog/view/theme/default/images/renlogs (2).png" alt="">
+                     </p>
+                     <div class="i-xmqing">
+                         <p class="i-xmname">张晓磊</p>
+                         <p>程序开发</p>
+                         <p>青岛大学</p>
+                         <p>计算机应用</p>
+                     </div>
+                 </li>
+                 <li class="i-xmli">
+                     <p class="i-xmleft">
+                         <img src="catalog/view/theme/default/images/renlogs (3).png" alt="">
+                     </p>
+                     <div class="i-xmqing">
+                         <p class="i-xmname">王兵</p>
+                         <p>销售总监</p>
+                         <p>中国石油大学</p>
+                         <p>国际贸易管理</p>
+                     </div>
+                 </li>
+                 <li class="i-xmli">
+                     <p class="i-xmleft">
+                         <img src="catalog/view/theme/default/images/renlogs (4).png" alt="">
+                     </p>
+                     <div class="i-xmqing">
+                         <p class="i-xmname">李正天</p>
+                         <p>前端工程师</p>
+                         <p>中国石油大学</p>
+                         <p>网络传播专业</p>
+                     </div>
+                 </li>
+                 <li class="i-xmli">
+                     <p class="i-xmleft">
+                         <img src="catalog/view/theme/default/images/renlogs (5).png" alt="">
+                     </p>
+                     <div class="i-xmqing">
+                         <p class="i-xmname">李磊</p>
+                         <p>WEB工程师</p>
+                         <p>北京服装学院</p>
+                         <p>网络传播专业</p>
+                     </div>
+                 </li>
+                 <li class="i-xmli">
+                     <p class="i-xmleft">
+                         <img src="catalog/view/theme/default/images/renlogs (3).png" alt="">
+                     </p>
+                     <div class="i-xmqing">
+                         <p class="i-xmname">刘强森</p>
+                         <p>前端工程师</p>
+                         <p>浙江大学</p>
+                         <p>程序开发专业</p>
+                     </div>
+                 </li>-->
+        </ul>
+    </div>
+
+</div>
+<!-- fonter start -->
+<div class="footing ">
+    <div class="content">
+        <!-- foot上 -->
+        <div class="top-conten">
+            <!-- top左 -->
+            <div class="conleft">
+                <ul class="letitle">
+                    <li class="titltop">帮助中心</li>
+                    <li class="titltop">意见反馈</li>
+                    <li class="titltop">联系我们</li>
+                    <li class="titltop">就业街微博</li>
+                    <li class="titltop nobian">就业街贴吧</li>
+                </ul>
+                <div class="address">
+                    <p class="addres-le">公司地址 ：青岛市经济开发区长江路157号</p>
+                    <p class="addres-ri">商务邮箱 ：business@jiuyejie.cn</p>
+                </div>
+                <div class="english">
+                    Address : No.157 Changjiangxi,Qingdao Development Zone,Shandong.
+                </div>
+            </div>
+            <!-- top右 -->
+            <div class="conright">
+                <div class="tact-left">
+                    <p class="phone">0532-8888888</p>
+                    <p class="serlin">
+                        <span class="service"><i class="fa fa-envelope-o"></i> 客服邮箱</span>
+                        <span class="line"><img src="images/keflog.png" alt="">在线客服</span>
+                    </p>
+                    <p>服务时间 ：8:30-18:30</p>
+                </div>
+                <div class="tact-right">
+                    <img src="images/2wm.png" alt="">
+                </div>
+
+            </div>
+        </div>
+        <!-- foot下 -->
+        <div class="bot-conten">
+            <div class="bot-contt">
+                Copyright © 2016-2026 JiuYeJie.cn 鲁ICP备16049263号© 青岛就业街大数据科技有限公司 版权所有
+            </div>
+            <ul class="bot-cul">
+                <li class="bot-cli"><img src="images/bots1.png" alt=""></li>
+                <li class="bot-cli"><img src="images/bots2.png" alt=""></li>
+                <li class="bot-cli"><img src="images/bots3.png" alt=""></li>
+                <li class="bot-cli"><img src="images/bots4.png" alt=""></li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Return top -->
+<!--<ul class="i-sidebar">
+	<li class="i-sidebali">
+		<p><img src="catalog/view/theme/default/images/topgl1.png" alt=""></p>
+		<p>在线客服</p>
+	</li>
+	<li class="i-sidebali">
+		<p><img src="catalog/view/theme/default/images/topgl2.png" alt=""></p>
+		<p>帮助中心</p>
+	</li>
+	<li class="i-sidebali">
+		<p><img src="catalog/view/theme/default/images/topgl3.png" alt=""></p>
+		<p>帮助中心</p>
+	</li>
+	<a href="#fantop">
+	<li class="i-sidebali " id="scrollTop">
+			<p><img src="catalog/view/theme/default/images/topgl4.png" alt=""></p>
+			<p>返回顶部</p>
+	</li>
+	</a>
+</ul>-->
+<style>
+
+    .mt10 {  }
+    .fs14 { font-size:14px }
+    .service_box{ position:fixed; z-index:1000;right:-147px;top:50%;margin-top:-100px;width:146px;border:1px solid #ece8e5; background:#fff; }
+    .service_box .tab_nav{ position:absolute;left:-42px;top:-1px;}
+    .service_box .tab_nav > li {background:#ece8e5;border-bottom:1px solid #dfdbd9;}
+    .service_box .tab_nav > li.active{ background:#ff6b09;}
+    .service_box .tab_nav > li:first-child{border-radius:8px 0 0;}
+    .service_box .tab_nav > li:last-child{ border-bottom:none; border-radius:0 0 0 8px;}
+    .service_box .tab_nav > li > a{ display:block; width:28px;padding:12px 6px 12px 8px; line-height:14px; text-align:center;color:#2c2c2c; text-decoration:none;}
+    .service_box .tab_nav > li.active > a{ color:#fff;font-family: "Microsoft Yahei", "微软雅黑", Tahoma, Arial, Helvetica, STHeiti; font-size:14px;}
+    .service_box .tab_nav .icon{ display:block; height:28px;width:28px; background:url(catalog/view/theme/default/stylesheet/images/bg_online_service_new.gif) no-repeat; overflow:hidden;margin:3px 0;*margin:6px 0;}
+    .service_box .tab_nav .icon_1{ background-position:0 0 ;}
+    .service_box .tab_nav .icon_2{ background-position:-28px 0 ;}
+    .service_box .tab_nav .icon_3{ background-position:-56px 0 ;}
+    .service_box .tab_nav .active .icon_1{ background-position:0 -28px ;}
+    .service_box .tab_nav .active .icon_2{ background-position:-28px -28px ;}
+    .service_box .tab_nav .active .icon_3{ background-position:-56px -28px ;}
+    .service_box .tab_content{padding:20px 5px 10px; position:relative;}
+    .service_box .tab_plan{ display:none; text-align:left;}
+    .service_box .tab_plan p{color:#333; font-size:14px;line-height:25px;}
+
+</style>
+<div class="service_box">
+    <ul class="tab_nav">
+        <li><a href="http://www.jiuyejie.cn/#"><i class="icon icon_1"></i>在线客服</a></li>
+        <li><a href="http://www.jiuyejie.cn/#"><i class="icon icon_3"></i></a></li>
+    </ul>
+    <div class="tab_content">
+        <div class="tab_plan">
+            <p class="fs14"><strong style="color:#ff5a00;">在线客服:</strong><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" href="http://wpa.qq.com/msgrd?v=3&amp;uin=2560969896&amp;Site=%E5%9C%A8%E7%BA%BF%E5%AE%A2%E6%9C%8D&amp;Menu=yes" class="qq_link"><img border="0" src="./就业街_files/pa" alt="点击这里给我发消息" title="点击这里给我发消息"></a></p>
+            <p class="fs14 mt10"><strong style="color:#ff5a00;">QQ群：</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong style="font-size:16px; ">138924529</strong></p>
+
+            <p class="mt10"><strong style="color:#ff5a00;">服务时间:</strong><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;周一至周六<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8:30-05:30
+            </p>
+            <p class="mt10"><strong style="color:#ff5a00;">服务热线:</strong><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15314237006<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15314238007
+            </p>
+        </div>
+        <div class="tab_plan" style="display: none;"><img src="images/weixins.jpg" alt="官方微信自助客服" width="130" height="130">
+            <p>扫一扫，关注就业街</p>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(".service_box .tab_nav li").hover(function(){
+        var i=$(this).index();
+        $(this).addClass("active").siblings().removeClass("active");
+        $(".service_box .tab_plan:eq("+i+")").show().siblings().hide();
+    });
+    $(function(){
+        var t;
+        $(".service_box").hover(function(){
+            $(".service_box").animate({right:0},300)
+            clearTimeout(t);
+        },function(){
+            t=setTimeout(function(e){
+                $(".service_box").animate({right:"-146px"},300);
+                $(".service_box").find(".tab_nav li").removeClass("active");
+            },1000);
+        });
+    });
+    var isTransition=true;
+    $(".m_logo").hover(function(){
+        var r=0;
+        if(isTransition){
+            animateTime = setInterval(function(){
+                if (r>=153){
+                    clearInterval(animateTime);
+                    isTransition=true;
+                }else{
+                    isTransition=false;
+                    r++;
+                    $(".m_logo a").attr("style","-webkit-mask:-webkit-gradient(radial, 45 25, "+r+", 45 25, "+(r+15)+", from(rgb(0, 0, 0)), color-stop(0.5, rgba(0, 0, 0, 0.2)), to(rgb(0, 0, 0)));")
+                };
+            },5);
+        }
+    },function(){
+        return;
+    });
+
+
+    function func_baoming_qiye(sxh_id,domain) {
+        window.open("http://site.jiuyejie.cn/index.php?route=shuangxuanhui/baoming_qiye&domain=" + domain + "&sxh_id=" + sxh_id);
+    }
+
+    function func_baoming_geren(sxh_id,sxh_name) {
+        $.MsgBox.Alert2('消息','您还没有登录，请先登录再来报名！',function(){
+            //func_log_reg('shuangxuanhui/shuangxuanhui','sxh_id',sxh_id);
+            window.location.href='index.php?route=account/login&url=shuangxuanhui/shuangxuanhui&argu=sxh_id&id=' + sxh_id;
+        });
+    }
+
+    function func_baoming_geren_xjh(xjh_id,xjh_name,school_id) {
+        $.MsgBox.Alert2('消息','您还没有登录，请先登录再来报名！',function(){
+            //func_log_reg('shuangxuanhui/xuanjianghui','xjh_id',xjh_id);
+            window.location.href="index.php?route=account/login&url=shuangxuanhui/xuanjianghui&argu=xjh_id&id=" + xjh_id;
+        });
+    }
+</script>
+
+
+</body>
+</html>
